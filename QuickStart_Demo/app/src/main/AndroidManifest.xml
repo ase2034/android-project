@@ -19,6 +19,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MinimRTCDemo">
         <activity
+            android:name=".My"
+            android:exported="false" />
+        <activity
+            android:name=".ChatRoom"
+            android:exported="false" />
+        <activity
             android:name=".viewpagerActivity"
             android:exported="false" />
         <activity

@@ -1,12 +1,15 @@
 package com.ss.rtc.demo.quickstart;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
+import android.view.MenuItem;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.airbnb.lottie.LottieAnimationView;
 
 public class AnimationActivity extends AppCompatActivity {
@@ -27,5 +30,11 @@ private LottieAnimationView lottieAnimationView;
                       startActivity(i);
             }
         },5000);
+        Intent intent = new Intent(getApplicationContext(), viewpagerActivity.class);
+        startActivity(intent);
+
+
+
+
     }
 }
