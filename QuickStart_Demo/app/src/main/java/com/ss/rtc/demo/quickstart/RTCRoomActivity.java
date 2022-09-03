@@ -1,4 +1,4 @@
-package com.ss.video.rtc.demo.quickstart;
+package com.ss.rtc.demo.quickstart;
 
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +30,6 @@ import com.ss.bytertc.engine.handler.IRTCEngineEventHandler;
 import com.ss.bytertc.engine.handler.IRTCVideoEventHandler;
 import com.ss.bytertc.engine.type.ChannelProfile;
 import com.ss.bytertc.engine.type.MediaStreamType;
-import com.ss.rtc.demo.quickstart.R;
 
 import java.util.List;
 import java.util.Locale;

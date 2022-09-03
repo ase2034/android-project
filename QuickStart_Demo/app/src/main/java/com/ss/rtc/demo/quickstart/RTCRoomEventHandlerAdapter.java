@@ -1,4 +1,4 @@
-package com.ss.video.rtc.demo.quickstart;
+package com.ss.rtc.demo.quickstart;
 
 import com.ss.bytertc.engine.RTCStream;
 import com.ss.bytertc.engine.SubscribeConfig;

@@ -1,4 +1,4 @@
-package com.ss.video.rtc.demo.quickstart;
+package com.ss.rtc.demo.quickstart;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ss.bytertc.engine.RTCEngine;
-import com.ss.rtc.demo.quickstart.R;
 
 import java.util.regex.Pattern;
 

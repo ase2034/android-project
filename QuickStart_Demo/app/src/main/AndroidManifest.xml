@@ -23,7 +23,8 @@
             android:exported="false" />
         <activity
             android:name=".AnimationActivity"
-            android:exported="true">
+            android:exported="true"
+            android:label="World Cup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

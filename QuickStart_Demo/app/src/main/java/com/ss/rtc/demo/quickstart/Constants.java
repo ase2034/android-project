@@ -1,4 +1,4 @@
-package com.ss.video.rtc.demo.quickstart;
+package com.ss.rtc.demo.quickstart;
 
 /**
  * VolcEngineRTC 常量定义
