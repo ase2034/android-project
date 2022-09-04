@@ -30,11 +30,6 @@ private LottieAnimationView lottieAnimationView;
                       startActivity(i);
             }
         },5000);
-        Intent intent = new Intent(getApplicationContext(), viewpagerActivity.class);
-        startActivity(intent);
-
-
-
 
     }
 }

@@ -38,9 +38,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".RTCRoomActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

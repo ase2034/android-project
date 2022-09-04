@@ -25,11 +25,11 @@ public class My extends AppCompatActivity {
                 switch (menuitem.getItemId()) {
                     case R.id.chatroom:
                         startActivity(new Intent(getApplicationContext(), ChatRoom.class));
-                        overridePendingTransition(enterAnim:0, enterAnim:0);
+                        overridePendingTransition(0, 0);
                         return true;
                     case R.id.home:
                         startActivity(new Intent(getApplicationContext(), viewpagerActivity.class));
-                        overridePendingTransition(enterAnim:0, enterAnim:0);
+                        overridePendingTransition(0, 0);
                         return true;
                     case R.id.my:
 

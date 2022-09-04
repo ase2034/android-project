@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -304,9 +305,11 @@ public class RTCRoomActivity extends AppCompatActivity {
         if (mIsMuteVideo) {
             // 关闭视频采集
             mRTCVideo.stopVideoCapture();
+            mSelfContainer.setVisibility(View.INVISIBLE);
         } else {
             // 开启视频采集
             mRTCVideo.startVideoCapture();
+            mSelfContainer.setVisibility(View.VISIBLE);
         }
         mVideoIv.setImageResource(mIsMuteVideo ? R.drawable.mute_video : R.drawable.normal_video);
     }
