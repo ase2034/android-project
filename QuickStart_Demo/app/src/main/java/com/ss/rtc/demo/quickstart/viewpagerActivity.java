@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+public void overridePendingTransition (int enterAnim, int exitAnim)
 public class viewpagerActivity extends AppCompatActivity {
 
     @Override
@@ -28,6 +29,9 @@ public class viewpagerActivity extends AppCompatActivity {
                     case R.id.chatroom:
                         startActivity(new Intent(getApplicationContext(), ChatRoom.class));
                         overridePendingTransition(0,0);
+
+                        overridePendingTransition(0,0)
+
                         return true;
                     case R.id.home:
                         return true;
