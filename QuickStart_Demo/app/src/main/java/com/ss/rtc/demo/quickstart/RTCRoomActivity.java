@@ -208,6 +208,28 @@ public class RTCRoomActivity extends AppCompatActivity {
         int joinRoomRes = mRTCRoom.joinRoom(Constants.TOKEN,
                 UserInfo.create(userId, ""), roomConfig);
         Log.i("TAG", "initEngineAndJoinRoom: " + joinRoomRes);
+        mSelfContainer.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onDoubleClick(View v) {
+                Intent i=new Intent(getApplicationContext(), Localvideo.class);
+                startActivity(i);
+            }
+        });
+    }
+
+    public  abstract class DoubleClickListener implements View.OnClickListener {
+        private static final long DOUBLE_TIME = 1000;
+        private long lastClickTime = 0;
+
+        @Override
+        public void onClick(View v) {
+            long currentTimeMillis = System.currentTimeMillis();
+            if (currentTimeMillis - lastClickTime < DOUBLE_TIME) {
+                onDoubleClick(v);
+            }
+            lastClickTime = currentTimeMillis;
+        }
+        public abstract void onDoubleClick(View v);
     }
 
     private void setLocalRenderView(String uid) {
@@ -224,6 +246,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
         // 设置本地视频渲染视图
         mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_MAIN, videoCanvas);
+
     }
 
     private void setRemoteRenderView(String roomId, String uid, FrameLayout container) {

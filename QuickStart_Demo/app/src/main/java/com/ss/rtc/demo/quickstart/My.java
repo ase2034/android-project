@@ -16,7 +16,6 @@ public class My extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
         BottomNavigationView bottomNavigationView = findViewById(R.id.botton_navigation);
-
         bottomNavigationView.setSelectedItemId(R.id.my);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
