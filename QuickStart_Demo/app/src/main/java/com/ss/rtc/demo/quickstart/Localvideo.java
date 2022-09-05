@@ -141,7 +141,7 @@ public class Localvideo extends Activity implements OnItemClickListener {
             ImageView imageView = (ImageView) view.findViewById(R.id.iv_show);
             TextView textView = (TextView) view.findViewById(R.id.tv_show);
             imageView.setImageBitmap(listPictures.get(position).getBitmap());
-            //textView.setText(listPictures.get(position).getPath());
+            textView.setText(listPictures.get(position).getPath());
             textView.setText(listPictures.get(position).getName());
             return view;
 
@@ -154,8 +154,23 @@ public class Localvideo extends Activity implements OnItemClickListener {
                             int arg2, long arg3) {
         // TODO Auto-generated method stub
         Toast.makeText(getApplicationContext(), "点击了" + arg2,Toast.LENGTH_SHORT).show();
+        playVideo(listPictures.get(arg2).getPath());
+        Intent i = new Intent(getApplicationContext(), RTCRoomActivity.class);
+        startActivity(i);
         Log.e("path", listPictures.get(arg2).getPath());
     }
+
+    private void playVideo(String videoPath) {
+					   Intent intent = new Intent(Intent.ACTION_VIEW);
+					   String strend="";
+					   if(videoPath.toLowerCase().endsWith(".mp4")){
+						   strend="mp4";
+					   }
+					   intent.setDataAndType(Uri.parse(videoPath), "video/*");
+					   startActivity(intent);
+
+    }
+
 
 
 }

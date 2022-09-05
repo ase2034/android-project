@@ -1,8 +1,12 @@
 package com.ss.rtc.demo.quickstart;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.TextureView;
@@ -12,6 +16,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,13 +31,21 @@ import com.ss.bytertc.engine.VideoEncoderConfig;
 import com.ss.bytertc.engine.data.AudioRoute;
 import com.ss.bytertc.engine.data.CameraId;
 import com.ss.bytertc.engine.data.RemoteStreamKey;
+import com.ss.bytertc.engine.data.ScreenMediaType;
 import com.ss.bytertc.engine.data.StreamIndex;
 import com.ss.bytertc.engine.data.VideoFrameInfo;
+import com.ss.bytertc.engine.data.VideoSourceType;
 import com.ss.bytertc.engine.handler.IRTCEngineEventHandler;
 import com.ss.bytertc.engine.handler.IRTCVideoEventHandler;
 import com.ss.bytertc.engine.type.ChannelProfile;
+import com.ss.bytertc.engine.type.MediaDeviceState;
 import com.ss.bytertc.engine.type.MediaStreamType;
+import com.ss.bytertc.engine.type.StreamRemoveReason;
+import com.ss.bytertc.engine.type.VideoDeviceType;
 
+import org.webrtc.RXScreenCaptureService;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -93,12 +107,14 @@ public class RTCRoomActivity extends AppCompatActivity {
     private CameraId mCameraID = CameraId.CAMERA_ID_FRONT;
 
     private FrameLayout mSelfContainer;
+    private FrameLayout viewvideo;
     private final FrameLayout[] mRemoteContainerArray = new FrameLayout[3];
     private final TextView[] mUserIdTvArray = new TextView[3];
     private final String[] mShowUidArray = new String[3];
 
     private RTCVideo mRTCVideo;
     private RTCRoom mRTCRoom;
+    private RTCEngine mRTCEngine;
 
     private RTCRoomEventHandlerAdapter mIRtcRoomEventHandler = new RTCRoomEventHandlerAdapter() {
 
@@ -170,11 +186,8 @@ public class RTCRoomActivity extends AppCompatActivity {
     private void initUI(String roomId, String userId) {
         mSelfContainer = findViewById(R.id.self_video_container);
         mRemoteContainerArray[0] = findViewById(R.id.remote_video_0_container);
-        mRemoteContainerArray[1] = findViewById(R.id.remote_video_1_container);
-        mRemoteContainerArray[2] = findViewById(R.id.remote_video_2_container);
+        viewvideo=findViewById(R.id.videoview);
         mUserIdTvArray[0] = findViewById(R.id.remote_video_0_user_id_tv);
-        mUserIdTvArray[1] = findViewById(R.id.remote_video_1_user_id_tv);
-        mUserIdTvArray[2] = findViewById(R.id.remote_video_2_user_id_tv);
         findViewById(R.id.switch_camera).setOnClickListener((v) -> onSwitchCameraClick());
         mSpeakerIv = findViewById(R.id.switch_audio_router);
         mAudioIv = findViewById(R.id.switch_local_audio);
@@ -187,6 +200,22 @@ public class RTCRoomActivity extends AppCompatActivity {
         TextView userIDTV = findViewById(R.id.self_video_user_id_tv);
         roomIDTV.setText(String.format("RoomID:%s", roomId));
         userIDTV.setText(String.format("UserID:%s", userId));
+    }
+
+    public abstract class DoubleClickListener implements View.OnClickListener {
+        private static final long DOUBLE_TIME = 1000;
+        private long lastClickTime = 0;
+
+        @Override
+        public void onClick(View v) {
+            long currentTimeMillis = System.currentTimeMillis();
+            if (currentTimeMillis - lastClickTime < DOUBLE_TIME) {
+                onDoubleClick(v);
+            }
+            lastClickTime = currentTimeMillis;
+        }
+
+        public abstract void onDoubleClick(View v);
     }
 
     private void initEngineAndJoinRoom(String roomId, String userId) {
@@ -211,26 +240,12 @@ public class RTCRoomActivity extends AppCompatActivity {
         mSelfContainer.setOnClickListener(new DoubleClickListener() {
             @Override
             public void onDoubleClick(View v) {
-                Intent i=new Intent(getApplicationContext(), Localvideo.class);
+                Intent i = new Intent(getApplicationContext(), Localvideo.class);
                 startActivity(i);
             }
         });
     }
 
-    public  abstract class DoubleClickListener implements View.OnClickListener {
-        private static final long DOUBLE_TIME = 1000;
-        private long lastClickTime = 0;
-
-        @Override
-        public void onClick(View v) {
-            long currentTimeMillis = System.currentTimeMillis();
-            if (currentTimeMillis - lastClickTime < DOUBLE_TIME) {
-                onDoubleClick(v);
-            }
-            lastClickTime = currentTimeMillis;
-        }
-        public abstract void onDoubleClick(View v);
-    }
 
     private void setLocalRenderView(String uid) {
         VideoCanvas videoCanvas = new VideoCanvas();
@@ -242,12 +257,28 @@ public class RTCRoomActivity extends AppCompatActivity {
         mSelfContainer.addView(renderView, params);
         videoCanvas.renderView = renderView;
         videoCanvas.uid = uid;
-        videoCanvas.isScreen = false;
+        videoCanvas.isScreen = false  ;
         videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
         // 设置本地视频渲染视图
         mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_MAIN, videoCanvas);
+    }
+
+    private void setLocalRenderView1(String uid) {
+        VideoCanvas videoCanvas = new VideoCanvas();
+        TextureView renderView = new TextureView(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        viewvideo.removeAllViews();
+        viewvideo.addView(renderView, params);
+        videoCanvas.renderView = renderView;
+        videoCanvas.uid = uid;
+        videoCanvas.isScreen = false;
+        videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
+        // 设置本地视频渲染视图
 
     }
+
 
     private void setRemoteRenderView(String roomId, String uid, FrameLayout container) {
         TextureView renderView = new TextureView(this);
@@ -361,4 +392,5 @@ public class RTCRoomActivity extends AppCompatActivity {
         mIRtcRoomEventHandler = null;
         mRTCVideo = null;
     }
+
 }
