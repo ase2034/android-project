@@ -23,7 +23,25 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <EditText
-        android:id="@+id/pass"
+        android:id="@+id/Username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal_bias=".5"
+        android:background="@drawable/edit_text_background"
+        android:hint="Name"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constrainedWidth_percent=".8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.375" />
+
+    <EditText
+        android:id="@+id/Password"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal_bias=".5"
@@ -37,30 +55,42 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/email"
+        app:layout_constraintVertical_bias="0.226" />
+
+    <EditText
+        android:id="@+id/confirm"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal_bias=".5"
+        android:background="@drawable/edit_text_background"
+        android:hint="Confirm"
+        android:paddingLeft="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constrainedWidth_percent=".8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.375" />
+        app:layout_constraintVertical_bias="0.535" />
+
     <Button
-        android:id="@+id/login"
+        android:id="@+id/signup2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constrainedWidth_percent=".8"
         app:layout_constraintVertical_bias=".7"
-        android:background="@drawable/button_background"
-        android:textColor="@color/white"
-        android:text="Login"
+        android:text="signup"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:background="@drawable/button_background"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Forget Password"
-        tools:layout_editor_absoluteX="152dp"
-        tools:layout_editor_absoluteY="302dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

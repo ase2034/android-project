@@ -23,25 +23,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <EditText
-        android:id="@+id/Username"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal_bias=".5"
-        android:background="@drawable/edit_text_background"
-        android:hint="Name"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        app:layout_constrainedWidth_percent=".8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.375" />
-
-    <EditText
-        android:id="@+id/Password"
+        android:id="@+id/pass"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal_bias=".5"
@@ -55,29 +37,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/email"
-        app:layout_constraintVertical_bias="0.226" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.375" />
 
-    <EditText
-        android:id="@+id/confirm"
+    <Button
+        android:id="@+id/login2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal_bias=".5"
-        android:background="@drawable/edit_text_background"
-        android:hint="Confirm"
-        android:paddingLeft="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:background="@drawable/button_background"
+        android:text="Login"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constrainedWidth_percent=".8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.535" />
-
+        app:layout_constraintVertical_bias="0.616"/>
     <Button
-        android:id="@+id/signup"
+        android:id="@+id/signup1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constrainedWidth_percent=".8"
