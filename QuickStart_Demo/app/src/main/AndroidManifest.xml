@@ -21,6 +21,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MinimRTCDemo">
         <activity
+            android:name=".Item"
+            android:exported="false" />
+        <activity
+            android:name=".WebPage"
+            android:exported="false" />
+        <activity
             android:name=".signupActivity"
             android:exported="false" />
         <activity
@@ -52,6 +58,12 @@
             android:name=".RTCRoomActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
+        <service
+            android:name="org.webrtc.RXScreenCaptureService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
     </application>
 
 </manifest>
