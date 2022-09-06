@@ -33,7 +33,7 @@ import java.util.List;
 
 public class Localvideo extends Activity implements OnItemClickListener {
 
-    private String cur_path = "/storage/emulated/0/DCIM/Camera/";
+    private String cur_path = "/storage/emulated/0/DCIM/Camera";
     private List<Picture> listPictures;
     private LottieAnimationView lottieAnimationView;
     ListView listView;
@@ -67,6 +67,7 @@ public class Localvideo extends Activity implements OnItemClickListener {
                 ObjectAnimator animatorout= ObjectAnimator.ofFloat(lottieAnimationView, "alpha",1.0f,0.0f);
                 animatorout.setDuration(1000);
                 animatorout.start();
+
             }
         },2000);
         loadVaule();
