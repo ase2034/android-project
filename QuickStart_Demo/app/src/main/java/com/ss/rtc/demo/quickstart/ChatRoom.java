@@ -111,17 +111,6 @@ public class ChatRoom extends AppCompatActivity {
         intent.putExtra(Constants.USER_ID_EXTRA, userId);
         startActivity(intent);
     }
-    public static final int REQUEST_CODE_OF_SCREEN_SHARING = 101;
-    // 向系统发起屏幕共享的权限请求
-    public void requestForScreenSharing() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            return;
-        }
-        MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        if (projectionManager != null) {
-            startActivityForResult(projectionManager.createScreenCaptureIntent(), REQUEST_CODE_OF_SCREEN_SHARING);
-        } else {
-            Log.e("ShareScreen","当前系统版本过低，无法支持屏幕共享");
-        }
-    }
+
+
 }

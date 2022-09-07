@@ -118,6 +118,7 @@ public class RTCRoomActivity extends AppCompatActivity {
     private ImageView mVideoIv;
     private ImageView mscrenIv;
     private ImageView mchat;
+    private ImageView mclose;
 
     private EditText realchat;
     private Button send;
@@ -157,6 +158,12 @@ public class RTCRoomActivity extends AppCompatActivity {
             Log.d("IRTCRoomEventHandler", "onUserJoined: " + userInfo.getUid());
         }
 
+        @Override
+        public void onUserPublishScreen(String uid, MediaStreamType type) {
+            super.onUserPublishScreen(uid, type);
+            runOnUiThread(()->setRemoteRenderView1(uid,viewvideo));
+        }
+
         /**
          * 远端用户离开房间回调。
          */
@@ -182,6 +189,14 @@ public class RTCRoomActivity extends AppCompatActivity {
         public void onRoomMessageSendResult(long msgid, int error) {
             super.onRoomMessageSendResult(msgid, error);
             Log.d("msg","sjndka"+error+"");
+
+        }
+
+        @Override
+        public void onUserUnpublishScreen(String uid, MediaStreamType type, StreamRemoveReason reason) {
+            super.onUserUnpublishScreen(uid, type, reason);
+            runOnUiThread(() -> removeRemoteView(uid));
+            viewvideo.setVisibility(View.INVISIBLE);
         }
     };
 
@@ -198,15 +213,9 @@ public class RTCRoomActivity extends AppCompatActivity {
 
         }
 
-        @Override
-        public void onRemoteVideoStateChanged(RemoteStreamKey streamKey,
-                                              RemoteVideoState videoState,
-                                              RemoteVideoStateChangeReason videoStateReason)
-        {
-            super.onRemoteVideoStateChanged(streamKey,videoState,videoStateReason);
-            Log.d("change1","stream change"+streamKey.toString());
-            runOnUiThread(()->setRemoteRenderView1(streamKey,viewvideo));
-        }
+
+
+
 
         /**
          * 警告回调，详细可以看 {https://www.volcengine.com/docs/6348/70082#warncode}
@@ -236,7 +245,6 @@ public class RTCRoomActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String roomId = intent.getStringExtra(Constants.ROOM_ID_EXTRA);
     userId = intent.getStringExtra(Constants.USER_ID_EXTRA);
-        requestForScreenSharing();
         initUI(roomId, userId);
         initEngineAndJoinRoom(roomId, userId);
     }
@@ -255,6 +263,8 @@ public class RTCRoomActivity extends AppCompatActivity {
         context = this;
         list = new ArrayList<>();
         findViewById(R.id.switch_camera).setOnClickListener((v) -> onSwitchCameraClick());
+        mclose=findViewById(R.id.close);
+        mclose.setVisibility(View.INVISIBLE);
         mSpeakerIv = findViewById(R.id.switch_audio_router);
         mAudioIv = findViewById(R.id.switch_local_audio);
         mVideoIv = findViewById(R.id.switch_local_video);
@@ -292,6 +302,19 @@ public class RTCRoomActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(manager);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setAdapter(adapterDome);
+        mclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRTCVideo.stopScreenCapture();
+            }
+        });
+        mSelfContainer.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onDoubleClick(View v) {
+                Intent i=new Intent(getApplicationContext(), Localvideo.class);
+                startActivity(i);
+            }
+        });
     }
 
     public abstract class DoubleClickListener implements View.OnClickListener {
@@ -329,7 +352,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         int joinRoomRes = mRTCRoom.joinRoom(Constants.TOKEN,
                 UserInfo.create(userId, ""), roomConfig);
         Log.i("TAG", "initEngineAndJoinRoom: " + joinRoomRes);
-
+        requestForScreenSharing();
     }
 
     public static final int REQUEST_CODE_OF_SCREEN_SHARING = 101;
@@ -355,7 +378,9 @@ public class RTCRoomActivity extends AppCompatActivity {
                            @Override
                            public void onClick(View v) {
                                startScreenShare(data);
-                               attachRenderView(viewvideo,userId,false);
+                               mRTCRoom.publishScreen(MediaStreamType.RTC_MEDIA_STREAM_TYPE_BOTH);
+                               mclose.setVisibility(View.VISIBLE);
+                               mRTCVideo.setVideoSourceType(StreamIndex.STREAM_INDEX_SCREEN, VideoSourceType.VIDEO_SOURCE_TYPE_INTERNAL);
                            }
                        });
 
@@ -376,28 +401,6 @@ public class RTCRoomActivity extends AppCompatActivity {
         videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
         // 设置本地视频渲染视图
         mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_MAIN, videoCanvas);
-    }
-
-    private void attachRenderView(FrameLayout parentView, String uid, boolean isRemoteUser) {
-        VideoCanvas videoCanvas = new VideoCanvas();
-        TextureView renderView = new TextureView(this);
-        videoCanvas.uid = uid;
-        videoCanvas.isScreen = false;
-        videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        videoCanvas.renderView = renderView;
-        parentView.removeAllViews();
-        parentView.addView(videoCanvas.renderView, params);
-        if (isRemoteUser) {
-            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, null);
-            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
-        } else {
-            mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_SCREEN,null);
-            mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
-
-        }
     }
 
     private void setRemoteRenderView(String roomId, String uid, FrameLayout container) {
@@ -435,7 +438,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         setRemoteRenderView(roomId, uid, mRemoteContainerArray[emptyInx]);
     }
 
-    private void setRemoteRenderView1(RemoteStreamKey remoteStreamKey, FrameLayout container) {
+    private void setRemoteRenderView1(String uid, FrameLayout container) {
         TextureView renderView = new TextureView(this);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -444,12 +447,12 @@ public class RTCRoomActivity extends AppCompatActivity {
         container.addView(renderView, params);
         VideoCanvas videoCanvas = new VideoCanvas();
         videoCanvas.renderView = renderView;
-        videoCanvas.roomId = remoteStreamKey.getRoomId();
+        videoCanvas.roomId = getIntent().getStringExtra(Constants.ROOM_ID_EXTRA);
         videoCanvas.isScreen=true;
-        videoCanvas.uid = remoteStreamKey.getUserId();
+        videoCanvas.uid =uid;
         videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
         // 设置远端用户视频渲染视图
-        mRTCVideo.setRemoteVideoCanvas(remoteStreamKey.getUserId(), StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
+        mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
     }
 
     private void removeRemoteView(String uid) {
@@ -534,7 +537,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         //编码参数
         VideoEncoderConfig config = new VideoEncoderConfig();
         config.width = 720;
-        config.height = 1280;
+        config.height = 640;
         config.frameRate = 15;
         config.maxBitrate = 1600;
         mRTCVideo.setScreenVideoEncoderConfig(config);

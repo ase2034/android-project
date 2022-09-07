@@ -169,9 +169,5 @@ public class Localvideo extends Activity implements OnItemClickListener {
 					   }
 					   intent.setDataAndType(Uri.parse(videoPath), "video/*");
 					   startActivity(intent);
-
     }
-
-
-
 }

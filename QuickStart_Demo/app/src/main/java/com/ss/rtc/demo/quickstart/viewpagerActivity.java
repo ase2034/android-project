@@ -25,7 +25,7 @@ public class viewpagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewpager);
         context=this;
-        recyclerView=(RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView=(RecyclerView) findViewById(R.id.recyclerView);
         List =new ArrayList<>();
         List.add(new Item("最新新闻1","https://m.hupu.com/bbs/55454606.html"));
         List.add(new Item("最新新闻2","https://m.hupu.com/bbs/55458231.html"));
