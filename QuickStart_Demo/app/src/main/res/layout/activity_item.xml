@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="100dp">
-    <TextView
+
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autoLink="all"
         android:layout_marginLeft="1dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="1dp"
         android:layout_marginBottom="1dp"
         android:gravity="center_vertical"
         android:text="test"
         android:textColor="@color/purple_200"
-        android:textSize="20dp"/>
+        android:textSize="20dp"
+
+        />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0.05dp"
+        android:background="@android:color/black" />
+
+
 
 </LinearLayout>
