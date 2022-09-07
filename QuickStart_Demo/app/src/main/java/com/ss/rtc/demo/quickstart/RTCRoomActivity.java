@@ -12,8 +12,11 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +24,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ss.bytertc.engine.RTCEngine;
 import com.ss.bytertc.engine.RTCRoom;
@@ -39,8 +45,12 @@ import com.ss.bytertc.engine.data.VideoSourceType;
 import com.ss.bytertc.engine.handler.IRTCEngineEventHandler;
 import com.ss.bytertc.engine.handler.IRTCVideoEventHandler;
 import com.ss.bytertc.engine.type.ChannelProfile;
+import com.ss.bytertc.engine.type.LocalVideoStreamError;
+import com.ss.bytertc.engine.type.LocalVideoStreamState;
 import com.ss.bytertc.engine.type.MediaDeviceState;
 import com.ss.bytertc.engine.type.MediaStreamType;
+import com.ss.bytertc.engine.type.RemoteVideoState;
+import com.ss.bytertc.engine.type.RemoteVideoStateChangeReason;
 import com.ss.bytertc.engine.type.StreamRemoveReason;
 import com.ss.bytertc.engine.type.VideoDeviceType;
 
@@ -49,8 +59,11 @@ import org.webrtc.RXScreenCaptureService;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * VolcEngineRTC 视频通话的主页面
@@ -103,7 +116,13 @@ public class RTCRoomActivity extends AppCompatActivity {
     private ImageView mSpeakerIv;
     private ImageView mAudioIv;
     private ImageView mVideoIv;
+    private ImageView mscrenIv;
+    private ImageView mchat;
 
+    private EditText realchat;
+    private Button send;
+
+    private LinearLayout chat_bar;
     private boolean mIsSpeakerPhone = true;
     private boolean mIsMuteAudio = false;
     private boolean mIsMuteVideo = false;
@@ -118,7 +137,14 @@ public class RTCRoomActivity extends AppCompatActivity {
     private RTCVideo mRTCVideo;
     private RTCRoom mRTCRoom;
     private  String userId;
-    private  Activity mHostActivity;
+    private RecyclerView recyclerView;//声明RecyclerView
+    private RecycleAdapterDome adapterDome;//声明适配器
+    private Context context;
+    private Timer timer;
+    private MyTimerTask timerTask;
+    private long lasttime;
+    private List<String> list;
+
 
     private RTCRoomEventHandlerAdapter mIRtcRoomEventHandler = new RTCRoomEventHandlerAdapter() {
 
@@ -140,6 +166,23 @@ public class RTCRoomActivity extends AppCompatActivity {
             Log.d("IRTCRoomEventHandler", "onUserLeave: " + uid);
             runOnUiThread(() -> removeRemoteView(uid));
         }
+        @Override
+        public void onRoomMessageReceived(String uid, String message)
+        {
+            super.onRoomMessageReceived(uid,message);
+            list.add(uid+":"+message);
+            adapterDome.notifyItemInserted(list.size()-1);
+            adapterDome.notifyItemRangeChanged(list.size()-1,1);
+            recyclerView.scrollToPosition(list.size()-1);
+            recyclerView.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        public void onRoomMessageSendResult(long msgid, int error) {
+            super.onRoomMessageSendResult(msgid, error);
+            Log.d("msg","sjndka"+error+"");
+        }
     };
 
     private IRTCVideoEventHandler mIRtcVideoEventHandler = new IRTCVideoEventHandler() {
@@ -152,6 +195,17 @@ public class RTCRoomActivity extends AppCompatActivity {
             super.onFirstRemoteVideoFrameDecoded(remoteStreamKey, frameInfo);
             Log.d("IRTCVideoEventHandler", "onFirstRemoteVideoFrame: " + remoteStreamKey.toString());
             runOnUiThread(() -> setRemoteView(remoteStreamKey.getRoomId(), remoteStreamKey.getUserId()));
+
+        }
+
+        @Override
+        public void onRemoteVideoStateChanged(RemoteStreamKey streamKey,
+                                              RemoteVideoState videoState,
+                                              RemoteVideoStateChangeReason videoStateReason)
+        {
+            super.onRemoteVideoStateChanged(streamKey,videoState,videoStateReason);
+            Log.d("change1","stream change"+streamKey.toString());
+            runOnUiThread(()->setRemoteRenderView1(streamKey,viewvideo));
         }
 
         /**
@@ -172,6 +226,7 @@ public class RTCRoomActivity extends AppCompatActivity {
             Log.d("IRTCVideoEventHandler", "onError: " + err);
             showAlertDialog(String.format(Locale.US, "error: %d", err));
         }
+
     };
 
     @Override
@@ -191,6 +246,14 @@ public class RTCRoomActivity extends AppCompatActivity {
         mRemoteContainerArray[0] = findViewById(R.id.remote_video_0_container);
         viewvideo=findViewById(R.id.videoview);
         mUserIdTvArray[0] = findViewById(R.id.remote_video_0_user_id_tv);
+        mscrenIv=findViewById(R.id.screen_share_off);
+        mchat=findViewById(R.id.chat);
+        chat_bar=findViewById(R.id.chat_bar);
+        realchat=findViewById(R.id.realcaht);
+        send=findViewById(R.id.send);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        context = this;
+        list = new ArrayList<>();
         findViewById(R.id.switch_camera).setOnClickListener((v) -> onSwitchCameraClick());
         mSpeakerIv = findViewById(R.id.switch_audio_router);
         mAudioIv = findViewById(R.id.switch_local_audio);
@@ -203,6 +266,32 @@ public class RTCRoomActivity extends AppCompatActivity {
         TextView userIDTV = findViewById(R.id.self_video_user_id_tv);
         roomIDTV.setText(String.format("RoomID:%s", roomId));
         userIDTV.setText(String.format("UserID:%s", userId));
+        mchat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chat_bar.setVisibility(View.VISIBLE);
+            }
+        });
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String msg=realchat.getText().toString();
+                chat_bar.setVisibility(View.INVISIBLE);
+                mRTCRoom.sendRoomMessage(msg);
+                realchat.setText("");
+                list.add(userId+":"+msg);
+                adapterDome.notifyItemInserted(list.size()-1);
+                adapterDome.notifyItemRangeChanged(list.size()-1,1);
+                recyclerView.scrollToPosition(list.size()-1);
+                startTimer();
+               recyclerView.setVisibility(View.VISIBLE);
+            }
+        });
+        adapterDome = new RecycleAdapterDome(context,list);
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        manager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setAdapter(adapterDome);
     }
 
     public abstract class DoubleClickListener implements View.OnClickListener {
@@ -240,12 +329,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         int joinRoomRes = mRTCRoom.joinRoom(Constants.TOKEN,
                 UserInfo.create(userId, ""), roomConfig);
         Log.i("TAG", "initEngineAndJoinRoom: " + joinRoomRes);
-        mSelfContainer.setOnClickListener(new DoubleClickListener() {
-            @Override
-            public void onDoubleClick(View v) {
 
-            }
-        });
     }
 
     public static final int REQUEST_CODE_OF_SCREEN_SHARING = 101;
@@ -267,9 +351,14 @@ public class RTCRoomActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_CODE_OF_SCREEN_SHARING:
-                startScreenShare(data);
-               // mRTCVideo.setVideoSourceType(StreamIndex.STREAM_INDEX_SCREEN, VideoSourceType.VIDEO_SOURCE_TYPE_INTERNAL);
-                attachRenderView(viewvideo,userId,true);
+                       mscrenIv.setOnClickListener(new View.OnClickListener() {
+                           @Override
+                           public void onClick(View v) {
+                               startScreenShare(data);
+                               attachRenderView(viewvideo,userId,false);
+                           }
+                       });
+
         }
     }
 
@@ -289,9 +378,6 @@ public class RTCRoomActivity extends AppCompatActivity {
         mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_MAIN, videoCanvas);
     }
 
-
-
-
     private void attachRenderView(FrameLayout parentView, String uid, boolean isRemoteUser) {
         VideoCanvas videoCanvas = new VideoCanvas();
         TextureView renderView = new TextureView(this);
@@ -305,11 +391,12 @@ public class RTCRoomActivity extends AppCompatActivity {
         parentView.removeAllViews();
         parentView.addView(videoCanvas.renderView, params);
         if (isRemoteUser) {
-            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_MAIN, null);
-            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_MAIN, videoCanvas);
+            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, null);
+            mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
         } else {
-            mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
             mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_SCREEN,null);
+            mRTCVideo.setLocalVideoCanvas(StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
+
         }
     }
 
@@ -346,6 +433,23 @@ public class RTCRoomActivity extends AppCompatActivity {
         mShowUidArray[emptyInx] = uid;
         mUserIdTvArray[emptyInx].setText(String.format("UserId:%s", uid));
         setRemoteRenderView(roomId, uid, mRemoteContainerArray[emptyInx]);
+    }
+
+    private void setRemoteRenderView1(RemoteStreamKey remoteStreamKey, FrameLayout container) {
+        TextureView renderView = new TextureView(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        container.removeAllViews();
+        container.addView(renderView, params);
+        VideoCanvas videoCanvas = new VideoCanvas();
+        videoCanvas.renderView = renderView;
+        videoCanvas.roomId = remoteStreamKey.getRoomId();
+        videoCanvas.isScreen=true;
+        videoCanvas.uid = remoteStreamKey.getUserId();
+        videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
+        // 设置远端用户视频渲染视图
+        mRTCVideo.setRemoteVideoCanvas(remoteStreamKey.getUserId(), StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
     }
 
     private void removeRemoteView(String uid) {
@@ -449,5 +553,25 @@ public class RTCRoomActivity extends AppCompatActivity {
             context.startForegroundService(RXScreenCaptureService.getServiceIntent(context, RXScreenCaptureService.COMMAND_LAUNCH, intent));
         }
     }
+    private class MyTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            if (System.currentTimeMillis() -lasttime > 1000 * 60 * 1) {
+                stopTimer();// 停止计时任务
+                recyclerView.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+    private void startTimer() {
+        timer = new Timer();
+        timerTask = new MyTimerTask();
+        lasttime = System.currentTimeMillis();
+        timer.schedule(timerTask, 0, 1000);
 
+    }
+
+    public void stopTimer()
+    {
+timer.cancel();
+    }
 }
