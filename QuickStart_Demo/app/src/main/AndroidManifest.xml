@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MinimRTCDemo">
         <activity
+            android:name=".video"
+            android:exported="false" />
+        <activity
             android:name=".Item"
             android:exported="false" />
         <activity

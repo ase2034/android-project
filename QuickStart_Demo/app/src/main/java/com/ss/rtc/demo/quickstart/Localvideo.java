@@ -38,6 +38,7 @@ public class Localvideo extends Activity implements OnItemClickListener {
     private LottieAnimationView lottieAnimationView;
     ListView listView;
     GridView mGridView;
+    public static String path;
 
     private Handler handler = new Handler() {
         @Override
@@ -155,19 +156,9 @@ public class Localvideo extends Activity implements OnItemClickListener {
                             int arg2, long arg3) {
         // TODO Auto-generated method stub
         Toast.makeText(getApplicationContext(), "点击了" + arg2,Toast.LENGTH_SHORT).show();
-        playVideo(listPictures.get(arg2).getPath());
-        Intent i = new Intent(getApplicationContext(), RTCRoomActivity.class);
+        path=listPictures.get(arg2).getPath();
+        Intent i = new Intent(getApplicationContext(), video.class);
         startActivity(i);
-        Log.e("path", listPictures.get(arg2).getPath());
     }
 
-    private void playVideo(String videoPath) {
-					   Intent intent = new Intent(Intent.ACTION_VIEW);
-					   String strend="";
-					   if(videoPath.toLowerCase().endsWith(".mp4")){
-						   strend="mp4";
-					   }
-					   intent.setDataAndType(Uri.parse(videoPath), "video/*");
-					   startActivity(intent);
-    }
 }

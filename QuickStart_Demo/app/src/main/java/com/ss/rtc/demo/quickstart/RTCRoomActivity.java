@@ -197,6 +197,7 @@ public class RTCRoomActivity extends AppCompatActivity {
             super.onUserUnpublishScreen(uid, type, reason);
             runOnUiThread(() -> removeRemoteView(uid));
             viewvideo.setVisibility(View.INVISIBLE);
+            mclose.setVisibility(View.INVISIBLE);
         }
     };
 
@@ -252,8 +253,12 @@ public class RTCRoomActivity extends AppCompatActivity {
     private void initUI(String roomId, String userId) {
         mSelfContainer = findViewById(R.id.self_video_container);
         mRemoteContainerArray[0] = findViewById(R.id.remote_video_0_container);
+        mRemoteContainerArray[1] = findViewById(R.id.remote_video_1_container);
+        mRemoteContainerArray[2] = findViewById(R.id.remote_video_2_container);
         viewvideo=findViewById(R.id.videoview);
         mUserIdTvArray[0] = findViewById(R.id.remote_video_0_user_id_tv);
+        mUserIdTvArray[1] = findViewById(R.id.remote_video_1_user_id_tv);
+        mUserIdTvArray[2] = findViewById(R.id.remote_video_2_user_id_tv);
         mscrenIv=findViewById(R.id.screen_share_off);
         mchat=findViewById(R.id.chat);
         chat_bar=findViewById(R.id.chat_bar);
