@@ -195,8 +195,8 @@ public class RTCRoomActivity extends AppCompatActivity {
         @Override
         public void onUserUnpublishScreen(String uid, MediaStreamType type, StreamRemoveReason reason) {
             super.onUserUnpublishScreen(uid, type, reason);
-            runOnUiThread(() -> removeRemoteView(uid));
             viewvideo.setVisibility(View.INVISIBLE);
+            runOnUiThread(() -> removeRemoteView(uid));
             mclose.setVisibility(View.INVISIBLE);
         }
     };
@@ -311,6 +311,8 @@ public class RTCRoomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mRTCVideo.stopScreenCapture();
+                viewvideo.setVisibility(View.INVISIBLE);
+                mclose.setVisibility(View.INVISIBLE);
             }
         });
         mSelfContainer.setOnClickListener(new DoubleClickListener() {
@@ -455,7 +457,7 @@ public class RTCRoomActivity extends AppCompatActivity {
         videoCanvas.roomId = getIntent().getStringExtra(Constants.ROOM_ID_EXTRA);
         videoCanvas.isScreen=true;
         videoCanvas.uid =uid;
-        videoCanvas.renderMode = VideoCanvas.RENDER_MODE_HIDDEN;
+        videoCanvas.renderMode = VideoCanvas.RENDER_MODE_Fill;
         // 设置远端用户视频渲染视图
         mRTCVideo.setRemoteVideoCanvas(uid, StreamIndex.STREAM_INDEX_SCREEN, videoCanvas);
     }
